@@ -3,11 +3,23 @@
   const $ = (s) => document.querySelector(s);
   const geometry = window.ShuttlegentBrandGeometry;
   const canvas = $('#warp'), ctx = canvas.getContext('2d');
-  const brand = $('#brand'), shuttle = $('#shuttle'), path = shuttle.querySelector('path');
-  path.setAttribute('d', geometry.shuttle.d);
+  const brand = $('#brand'), mark = $('#mark');
+  // The mark as in the plugin (mark.js): threads behind the shuttle, the shuttle, threads in front; each part pivots on its centre
+  const NS = 'http://www.w3.org/2000/svg', [viewX, viewY] = geometry.viewBox;
+  const part = (shape, x, y) => {const g = document.createElementNS(NS,'g');g.style.transformBox='view-box';g.style.transformOrigin=`${x-viewX}px ${y-viewY}px`;g.appendChild(shape);return g;};
+  const shape = (tag, attributes) => {const node = document.createElementNS(NS,tag);for(const key in attributes)node.setAttribute(key,attributes[key]);return node;};
+  const threads = geometry.threads.map((t) => part(shape('rect',{x:t.x-t.width/2,y:t.top,width:t.width,height:t.height,rx:t.width/2,fill:geometry.colors.ivory}),t.x,t.top+t.height/2));
+  const shuttle = part(shape('path',{d:geometry.shuttle.d,fill:geometry.colors.red,transform:`rotate(${geometry.shuttle.axisDeg})`}),0,0);
+  mark.append(...threads.filter((g,i)=>!geometry.threads[i].front),shuttle,...threads.filter((g,i)=>geometry.threads[i].front));
+  // The running-step weave of the usage demo: the same parts with the classes style.css animates (the plugin's sg-weave-*)
+  const markup = () => {const svg = shape('svg',{viewBox:geometry.viewBox.join(' ')});
+    const threadPart = (t) => {const g = part(shape('rect',{x:t.x-t.width/2,y:t.top,width:t.width,height:t.height,rx:t.width/2,fill:geometry.colors.ivory}),t.x,t.top+t.height/2);g.classList.add('weave-thread');return g;};
+    const s = part(shape('path',{d:geometry.shuttle.d,fill:geometry.colors.red,transform:`rotate(${geometry.shuttle.axisDeg})`}),0,0);s.classList.add('weave-shuttle');
+    svg.append(...geometry.threads.filter(t=>!t.front).map(threadPart),s,...geometry.threads.filter(t=>t.front).map(threadPart));return svg;};
+  $('#demo-weave').appendChild(markup());
   const panels = [...document.querySelectorAll('.panel')], links = [...document.querySelectorAll('nav a')];
   const ids = ['interface','capabilities','agents','usage','extend'];
-  const labels = ['插件主界面','能力介绍','Agent 接入','如何使用','自定义扩展'];
+  const labels = ['插件主界面','能力介绍','模型与 Agent','如何使用','自定义扩展'];
   const media = matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = media.matches, width = innerWidth, height = innerHeight, lines = [], pointer = null;
   let progress = scrollY / height, target = progress, frame = 0, last = 0, introStart = performance.now(), introFinished = scrollY > 20;
@@ -73,13 +85,13 @@
     let sx=cx,sy=cy,opacity=1;
     if(!introFinished&&!reduced){
       const t=(now-introStart)/1000;
-      const left=ease(t/1.1),right=ease((t-.15)/1.1),entry=ease((t-.6)/1.3);
-      $('#left-thread').style.transform=`translateY(${-40*(1-left)}px)`;$('#left-thread').style.opacity=left;
-      $('#right-thread').style.transform=`translateY(${40*(1-right)}px)`;$('#right-thread').style.opacity=right;
+      // Threads drop into place from above and below in turn, then the shuttle slides in along its axis (mark.js weave)
+      threads.forEach((thread,i)=>{const drop=ease((t-.15*i)/1.1);thread.style.transform=`translateY(${(i%2?40:-40)*(1-drop)}px)`;thread.style.opacity=drop;});
+      const entry=ease((t-.6)/1.3);
       sx=cx-220*scale*ux*(1-entry);sy=cy-220*scale*uy*(1-entry);opacity=entry;
       if(t>=1.9)introFinished=true;
     }else{
-      ['#left-thread','#right-thread'].forEach(s=>{$(s).style.transform='none';$(s).style.opacity=1;});
+      threads.forEach(thread=>{thread.style.transform='none';thread.style.opacity=1;});
       if(!reduced&&scrollDirection>0&&change>0){
         const halfX=Math.hypot(geometry.shuttle.halfLength*ux,geometry.shuttle.halfThickness*uy)*scale;
         const halfY=Math.hypot(geometry.shuttle.halfLength*uy,geometry.shuttle.halfThickness*ux)*scale;
@@ -94,7 +106,7 @@
         sx=cx+ux*distance;sy=cy+uy*distance;
         const settle=clamp((change-flightEnd)/(1-flightEnd));
         const threadScale=1-.045*Math.sin(Math.PI*settle);
-        ['#left-thread','#right-thread'].forEach(selector=>{$(selector).style.transform='scaleY('+threadScale+')';});
+        threads.forEach(thread=>{thread.style.transform='scaleY('+threadScale+')';});
       }
     }
     shuttle.style.transform=`translate(${(sx-cx)/scale}px,${(sy-cy)/scale}px)`;shuttle.style.opacity=opacity;
