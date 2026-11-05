@@ -60,18 +60,18 @@ node --check assets/brand-geometry.js
 
 ## 界面图
 
-`assets/shots/` 下目前是绘制的示意图（SVG），页面上标注了“示意图”。拿到编辑器实机截图后逐张替换：
+`assets/shots/` 下是编辑器实机截图，原图宽 3840 左右，缩到宽 1920 后放进来：画面类存 JPEG（质量 90），只有文字和控件的窄条存 PNG。
 
 | 文件 | 画面 | 用在 |
 |---|---|---|
-| `panel` | 编辑器全貌：关卡视口加右侧停靠的面板，面板里有确认卡 | 第 01 章大图；文档页把插件 README 的 `Docs/Images/panel.png` 也换成它 |
-| `multi-session` | 一个会话拖出成独立窗口，与主面板同时停靠 | 第 01 章切换 |
-| `content-drag` | 从内容浏览器往输入框拖资产 | 第 01 章切换 |
-| `toolbar` | 主工具栏播放按钮右侧的 Shuttlegent 按钮与悬停提示 | 接入步骤弹窗 |
-| `viewport-before`、`viewport-after` | 同一相机位置，改动前后的关卡视口（三盏灯 5000/5000/1800 → 8000） | 第 04 章前后对比动画 |
-| `models` | 编辑器偏好设置 › Shuttlegent › Models，一条 Connected 的连接，密钥隐藏 | 第 03 章“查看偏好设置” |
+| `panel.jpg` | 编辑器全貌：关卡视口加右侧停靠的面板，面板里是改三盏灯强度的结果 | 第 01 章大图；文档页把插件 README 的 `Docs/Images/panel.png` 换成它 |
+| `multi-session.jpg` | 两个会话并排停靠在视口右侧 | 第 01 章切换 |
+| `content-drag.jpg` | 输入框里拖入的关卡与静态网格体引用 | 第 01 章切换 |
+| `toolbar.jpg` | 主工具栏播放按钮右侧的 Shuttlegent 按钮与悬停提示 | 接入步骤弹窗 |
+| `viewport-before.jpg`、`viewport-after.jpg` | 同一相机位置，改动前后的关卡视口（三盏灯 5000/5000/1800 → 8000） | 第 04 章前后对比动画 |
+| `models.png` | 编辑器偏好设置 › Shuttlegent › Models，一条 Connected 的连接，密钥以掩码显示 | 第 03 章“查看偏好设置” |
 
-替换时实机截图存为 WebP（或 PNG），文件名不变，把 `index.html`、`app.js`、`docs/docs.js` 中对应的 `.svg` 改成新扩展名，再去掉页面上的“示意图”字样（`index.html` 两处脚注与 `app.js` 的 `openShot`）。
+换图时文件名不变；扩展名变了，要同步改 `index.html`、`app.js`、`docs/docs.js` 里的引用。第 01 章大图框的宽高比按截图设为 1920/1045（`style.css` 的 `.shot-stage`），截图尺寸变了要一起改。
 
 ## 文档
 

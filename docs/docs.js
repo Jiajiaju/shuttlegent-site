@@ -18,7 +18,7 @@
     { id: 'Development', title: '开发', group: '开发' }
   ];
   // Repository images the site has its own version of
-  const SITE_IMAGES = { 'Docs/Images/panel.png': '../assets/shots/panel.svg' };
+  const SITE_IMAGES = { 'Docs/Images/panel.png': '../assets/shots/panel.jpg' };
 
   // The mark in the header, from the brand geometry
   const G = window.ShuttlegentBrandGeometry, NS = 'http://www.w3.org/2000/svg';

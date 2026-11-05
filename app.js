@@ -52,12 +52,12 @@
   function measureDock(){const r=$('.rail-brand').getBoundingClientRect();dockX=r.left+r.width/2;wake();}
   document.fonts.ready.then(measureDock);
   function setReduced(value){reduced=value;document.body.classList.toggle('reduced',value);runDemo(current);wake();}
-  // Interface shots (drawn placeholders until real editor screenshots replace them)
+  // Interface shots: editor screenshots
   const shots={
-    'panel':{src:'assets/shots/panel.svg',caption:'对话面板停靠在关卡视口旁',alt:'编辑器全貌：左侧关卡视口选中三盏路灯，右侧停靠 Shuttlegent 面板，显示修改强度的确认卡'},
-    'multi-session':{src:'assets/shots/multi-session.svg',caption:'两个会话同时进行，一个拖到视口下方停靠',alt:'两个 Shuttlegent 会话：一个停靠在右侧，一个停靠在关卡视口下方'},
-    'content-drag':{src:'assets/shots/content-drag.svg',caption:'从内容浏览器把资产拖进输入框引用',alt:'从内容浏览器把 SM_Lamp_Post 拖向 Shuttlegent 输入框'},
-    'models':{src:'assets/shots/models.svg',caption:'编辑器偏好设置 › Shuttlegent › Models：已连通的连接，密钥以掩码显示',alt:'编辑器偏好设置中的 Shuttlegent Models 设置，一条连接显示 Connected'}
+    'panel':{src:'assets/shots/panel.jpg',caption:'对话面板停靠在关卡视口旁',alt:'编辑器全貌：左侧关卡视口，右侧停靠 Shuttlegent 面板，显示把三盏路灯强度统一改为 8000 的结果'},
+    'multi-session':{src:'assets/shots/multi-session.jpg',caption:'两个会话同时进行，并排停靠在视口右侧',alt:'两个 Shuttlegent 会话并排停靠在关卡视口右侧：一个列出关卡里的 Actor，一个修改灯光强度'},
+    'content-drag':{src:'assets/shots/content-drag.jpg',caption:'从内容浏览器、大纲视图拖进输入框的资产作为引用',alt:'Shuttlegent 输入框里有两个引用：关卡 Shuttlegent 和静态网格体 ArcadeEditorSphere'},
+    'models':{src:'assets/shots/models.png',caption:'编辑器偏好设置 › Shuttlegent › Models：已连通的 OpenAI 连接，密钥以掩码显示',alt:'编辑器偏好设置中的一条 OpenAI 连接：Base Url、掩码显示的 Api Key、状态 Connected 和检测到的模型列表'}
   };
   let shown='panel';
   function showShot(name){
@@ -69,7 +69,7 @@
     img.classList.add('is-swapping');setTimeout(swap,180);
   }
   document.querySelectorAll('[data-shot]').forEach(b=>b.addEventListener('click',()=>showShot(b.dataset.shot)));
-  function openShot(name){const shot=shots[name];$('#dialog-image').src=shot.src;$('#dialog-image').alt=shot.alt;$('#dialog-caption').textContent=shot.caption+' · 示意图';$('#image-dialog').showModal();}
+  function openShot(name){const shot=shots[name];$('#dialog-image').src=shot.src;$('#dialog-image').alt=shot.alt;$('#dialog-caption').textContent=shot.caption;$('#image-dialog').showModal();}
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>openShot(b.dataset.view)));
   // Chapter demos: 03 connects a model, 04 confirms a change and the viewport updates; they loop while their chapter is shown
   let demoTimers=[];
