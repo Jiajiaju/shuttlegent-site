@@ -19,7 +19,6 @@
   $('#demo-weave').appendChild(markup());
   const panels = [...document.querySelectorAll('.panel')], links = [...document.querySelectorAll('nav a')];
   const ids = ['interface','capabilities','agents','usage','extend'];
-  const labels = ['插件主界面','能力介绍','模型与 Agent','如何使用','自定义扩展'];
   const media = matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = media.matches, width = innerWidth, height = innerHeight, lines = [], pointer = null;
   let progress = scrollY / height, target = progress, frame = 0, last = 0, introStart = performance.now(), introFinished = scrollY > 20;
@@ -45,10 +44,68 @@
     ctx.setTransform(dpr,0,0,dpr,0,0);
     lines=[];
     for(let x=31.5,index=0;x<width;x+=64,index++) lines.push({x,index,offset:0,velocity:0,y:height/2,reach:50});
+    measureDock();
     target=scrollY/height;progress=target;wake();
   }
-  function setReduced(value){reduced=value;document.body.classList.toggle('reduced',value);$('#motion').setAttribute('aria-pressed',String(value));$('#motion').textContent=value?'恢复动态':'减少动态';wake();}
-  $('#motion').addEventListener('click',()=>setReduced(!reduced));
+  // On desktop the docked mark centres over the name under it in the rail, as the intro lockup does
+  let dockX=0;
+  function measureDock(){const r=$('.rail-brand').getBoundingClientRect();dockX=r.left+r.width/2;wake();}
+  document.fonts.ready.then(measureDock);
+  function setReduced(value){reduced=value;document.body.classList.toggle('reduced',value);runDemo(current);wake();}
+  // Interface shots (drawn placeholders until real editor screenshots replace them)
+  const shots={
+    'panel':{src:'assets/shots/panel.svg',caption:'对话面板停靠在关卡视口旁',alt:'编辑器全貌：左侧关卡视口选中三盏路灯，右侧停靠 Shuttlegent 面板，显示修改强度的确认卡'},
+    'multi-session':{src:'assets/shots/multi-session.svg',caption:'两个会话同时进行，一个拖到视口下方停靠',alt:'两个 Shuttlegent 会话：一个停靠在右侧，一个停靠在关卡视口下方'},
+    'content-drag':{src:'assets/shots/content-drag.svg',caption:'从内容浏览器把资产拖进输入框引用',alt:'从内容浏览器把 SM_Lamp_Post 拖向 Shuttlegent 输入框'},
+    'models':{src:'assets/shots/models.svg',caption:'编辑器偏好设置 › Shuttlegent › Models：已连通的连接，密钥以掩码显示',alt:'编辑器偏好设置中的 Shuttlegent Models 设置，一条连接显示 Connected'}
+  };
+  let shown='panel';
+  function showShot(name){
+    if(name===shown)return;shown=name;const img=$('#shot'),shot=shots[name];
+    document.querySelectorAll('[data-shot]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.shot===name)));
+    $('#shot-caption').textContent=shot.caption;
+    const swap=()=>{img.src=shot.src;img.alt=shot.alt;img.classList.remove('is-swapping');};
+    if(reduced){swap();return;}
+    img.classList.add('is-swapping');setTimeout(swap,180);
+  }
+  document.querySelectorAll('[data-shot]').forEach(b=>b.addEventListener('click',()=>showShot(b.dataset.shot)));
+  function openShot(name){const shot=shots[name];$('#dialog-image').src=shot.src;$('#dialog-image').alt=shot.alt;$('#dialog-caption').textContent=shot.caption+' · 示意图';$('#image-dialog').showModal();}
+  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>openShot(b.dataset.view)));
+  // Chapter demos: 03 connects a model, 04 confirms a change and the viewport updates; they loop while their chapter is shown
+  let demoTimers=[];
+  const later=(ms,fn)=>demoTimers.push(setTimeout(fn,ms));
+  const conversation=$('#conversation-demo'),setup=$('#setup-demo');
+  function setSetup(step,status='',key=''){setup.dataset.step=step;$('#setup-status').textContent=status;$('#setup-key').textContent=key;}
+  function setupDemo(){
+    setSetup('typing');
+    for(let i=1;i<=16;i++)later(500+i*70,()=>{$('#setup-key').textContent='•'.repeat(i);});
+    const key='•'.repeat(16);
+    later(1900,()=>setSetup('pressed','',key));
+    later(2150,()=>setSetup('testing','检测中…',key));
+    later(3700,()=>setSetup('ready','',key));
+    later(7200,()=>setSetup('idle'));
+    later(7800,setupDemo);
+  }
+  function setViewport(state){
+    $('#viewport-demo').dataset.state=state;$('#vp-tag').textContent=state==='after'?'改动后':'改动前';
+    document.querySelectorAll('[data-vp]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.vp===state)));
+    conversation.classList.toggle('is-applied',state==='after');
+    $('#approval-note').textContent=state==='after'?'已执行 · 可撤销':'仅确认这一次 · 52 秒';
+  }
+  function viewportDemo(){
+    setViewport('before');
+    later(2200,()=>conversation.classList.add('is-pressed'));
+    later(2600,()=>{conversation.classList.remove('is-pressed');setViewport('after');});
+    later(6800,()=>setViewport('before'));
+    later(8000,viewportDemo);
+  }
+  function runDemo(index){
+    demoTimers.forEach(clearTimeout);demoTimers=[];
+    conversation.classList.remove('is-pressed');setSetup('idle');setViewport('before');
+    if(reduced)return;
+    if(index===2)setupDemo();else if(index===3)viewportDemo();
+  }
+  document.querySelectorAll('[data-vp]').forEach(b=>b.addEventListener('click',()=>{demoTimers.forEach(clearTimeout);demoTimers=[];conversation.classList.remove('is-pressed');setViewport(b.dataset.vp);}));
   media.addEventListener('change',e=>setReduced(e.matches));
   function navigate(index){const id=index<0?'intro':ids[index];document.getElementById(id).scrollIntoView({behavior:reduced?'instant':'smooth',block:'start'});}
   document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigate(ids.indexOf(a.hash.slice(1)));}));
@@ -56,9 +113,9 @@
   function visible(node,alpha){node.style.opacity=alpha.toFixed(3);node.style.visibility=alpha>.001?'visible':'hidden';node.style.pointerEvents=alpha>.7?'auto':'none';node.inert=alpha<.7;}
   function render(now,dt){
     const p=progress, dock=ease(p/1.1), mobile=width<=760;
-    const startScale=mobile?0.82:Math.min(1.35,width/1000), endScale=mobile?.22:.612;
+    const startScale=mobile?.55:Math.min(.75,width/1300), endScale=mobile?.22:.612;
     const scale=lerp(startScale,endScale,dock);
-    const startX=width/2,startY=height*.36,endX=mobile?48:width*.07+105,endY=mobile?106:height*.205;
+    const startX=width/2,startY=height*.4,endX=mobile?48:dockX,endY=mobile?106:height*.205;
     const cx=lerp(startX,endX,dock),cy=lerp(startY,endY,dock);
     brand.style.transform=`translate(${cx-172*scale}px,${cy-112*scale}px) scale(${scale})`;
     const introAlpha=1-ease(p/.65);
@@ -77,9 +134,9 @@
       else if(i===index+1){alpha=reveal;shift=32*(1-alpha);}
       visible(panel,alpha);panel.style.transform=`translateY(calc(-50% + ${shift}px))`;
     });
+    if(active!==current)runDemo(active);
     current=active;
     links.forEach((a,i)=>a.setAttribute('aria-current',String(i===active)));
-    $('#chapter-label').textContent=active<0?'序章 / 一次穿行的开始':`0${active+1} / ${labels[active]}`;
     $('#next').textContent=active===4?'回到开场 ↑':'继续向下 ↓';
     $('#progress').style.width=clamp(p/scrollEnd)*100+'%';
     let sx=cx,sy=cy,opacity=1;
@@ -89,8 +146,11 @@
       threads.forEach((thread,i)=>{const drop=ease((t-.15*i)/1.1);thread.style.transform=`translateY(${(i%2?40:-40)*(1-drop)}px)`;thread.style.opacity=drop;});
       const entry=ease((t-.6)/1.3);
       sx=cx-220*scale*ux*(1-entry);sy=cy-220*scale*uy*(1-entry);opacity=entry;
+      // The name follows once the shuttle has nearly settled (style.css .name-in)
+      if(t>=1.6)document.body.classList.add('name-in');
       if(t>=1.9)introFinished=true;
     }else{
+      document.body.classList.add('name-in');
       threads.forEach(thread=>{thread.style.transform='none';thread.style.opacity=1;});
       if(!reduced&&scrollDirection>0&&change>0){
         const halfX=Math.hypot(geometry.shuttle.halfLength*ux,geometry.shuttle.halfThickness*uy)*scale;
@@ -158,7 +218,7 @@
   addEventListener('pointermove',e=>{pointer={x:e.clientX,y:e.clientY};wake();},{passive:true});
   document.addEventListener('pointerleave',()=>{pointer=null;wake();});
   document.addEventListener('visibilitychange',()=>{last=performance.now();wake();});
-  $('#expand').addEventListener('click',()=>$('#image-dialog').showModal());
+  $('#expand').addEventListener('click',()=>openShot(shown));
   $('#guide').addEventListener('click',()=>$('#guide-dialog').showModal());
   document.querySelectorAll('dialog').forEach(d=>{d.querySelector('.close').addEventListener('click',()=>d.close());d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});});
   setReduced(reduced);resize();
