@@ -19,6 +19,9 @@
   ];
   // Repository images the site has its own version of
   const SITE_IMAGES = { 'Docs/Images/panel.png': '../assets/shots/panel.jpg' };
+  // The site-only docs show the site's own screenshots as ../assets/shots/..., which reads as assets/shots/... from Docs/
+  const SITE_SHOTS = 'assets/shots/';
+  const siteImage = (path) => SITE_IMAGES[path] || (path.startsWith(SITE_SHOTS) ? `../${path}` : '');
 
   // The mark in the header, from the brand geometry
   const G = window.ShuttlegentBrandGeometry, NS = 'http://www.w3.org/2000/svg';
@@ -182,7 +185,7 @@
       if (doc && DOCS.some((d) => d.id === doc)) a.setAttribute('href', `?p=${doc}${hash ? `#${hash}` : ''}`);
       else { a.setAttribute('href', `${REPO}/blob/main/${target}${hash ? `#${hash}` : ''}`); a.target = '_blank'; a.rel = 'noopener'; }
     }
-    const mapSrc = (src) => (/^[a-z][\w+.-]*:/i.test(src) || src.startsWith('//') ? src : SITE_IMAGES[repoPath(dir, src)] || RAW + repoPath(dir, src));
+    const mapSrc = (src) => (/^[a-z][\w+.-]*:/i.test(src) || src.startsWith('//') ? src : siteImage(repoPath(dir, src)) || RAW + repoPath(dir, src));
     for (const img of root.querySelectorAll('img[src]')) img.setAttribute('src', mapSrc(img.getAttribute('src')));
     for (const source of root.querySelectorAll('source[srcset]')) source.setAttribute('srcset', mapSrc(source.getAttribute('srcset')));
   }
