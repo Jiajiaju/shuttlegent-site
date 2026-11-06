@@ -20,7 +20,12 @@
   const panels = [...document.querySelectorAll('.panel')], links = [...document.querySelectorAll('nav a')];
   const ids = ['interface','capabilities','agents','usage','extend'];
   const media = matchMedia('(prefers-reduced-motion: reduce)');
-  let reduced = media.matches, width = innerWidth, height = innerHeight, lines = [], pointer = null;
+  let reduced = media.matches, width = innerWidth, height = innerHeight, lines = [], pointer = null, lastPointer = null;
+  // Plucking a warp line: a pointer that crosses it carries it along until it slips off past SLIP pixels and rings;
+  // a sweep already past SLIP within one frame flicks it instead, harder the faster the sweep (px/s), up to FLICK_MAX
+  const SLIP = 14, POINTER_REACH = 44, FLICK_BASE = 30, FLICK_GAIN = .12, FLICK_MAX = 240;
+  // Spring while carried (stiff, critically damped) and while free (the underdamped rebound); bend position eases at FOLLOW per second
+  const CARRY_K = 6000, CARRY_C = 155, FREE_K = 320, FREE_C = 9, FOLLOW = 24;
   let progress = scrollY / height, target = progress, frame = 0, last = 0, introStart = performance.now(), introFinished = scrollY > 20;
   let current = -1, previousShuttle = null, scrollDirection = 1;
   const clamp = (v,a=0,b=1) => Math.min(b,Math.max(a,v));
@@ -43,7 +48,7 @@
     canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     lines=[];
-    for(let x=31.5,index=0;x<width;x+=64,index++) lines.push({x,index,offset:0,velocity:0,y:height/2,reach:50});
+    for(let x=31.5,index=0;x<width;x+=64,index++) lines.push({x,index,offset:0,velocity:0,y:height/2,reach:50,aimY:height/2,aimReach:50,held:0});
     measureDock();
     target=scrollY/height;progress=target;wake();
   }
@@ -178,9 +183,29 @@
     const shuttleMoving=(scrollDirection>0||!introFinished)&&(p>=1.1||!introFinished)&&previousShuttle!==null&&Math.hypot(relativeShuttle.x-previousShuttle.x,relativeShuttle.y-previousShuttle.y)>.02;
     previousShuttle=relativeShuttle;
     let moving=false;ctx.clearRect(0,0,width,height);
+    // The pointer's path since the last frame, so a fast sweep still reaches every line it passed
+    const from=lastPointer,to=reduced?null:pointer,sweep=from&&to?to.x-from.x:0;
     for(const line of lines){
-      let wanted=0;
-      if(!reduced&&pointer&&Math.abs(line.x-pointer.x)<26){wanted=Math.sign(line.x-pointer.x||1)*7*(1-Math.abs(line.x-pointer.x)/26);line.y=pointer.y;line.reach=44;}
+      let wanted=0,carried=false;
+      const quiet=Math.abs(line.offset)<.3&&Math.abs(line.velocity)<3;
+      if(!to)line.held=0;
+      else{
+        const pull=to.x-line.x;
+        // Carried: follows the pointer; going back across or past the slip distance lets it go
+        if(line.held){
+          if(Math.sign(pull)!==line.held||Math.abs(pull)>SLIP)line.held=0;
+          else{wanted=pull;carried=true;line.aimY=to.y;line.aimReach=POINTER_REACH;}
+        }
+        if(!line.held&&sweep&&(from.x<line.x)!==(to.x<line.x)){
+          const crossY=from.y+(to.y-from.y)*(line.x-from.x)/sweep,direction=Math.sign(sweep);
+          line.aimY=crossY;line.aimReach=POINTER_REACH;
+          if(Math.abs(pull)<=SLIP){line.held=direction;wanted=pull;carried=true;line.aimY=to.y;}
+          else line.velocity+=direction*Math.min(FLICK_MAX,FLICK_BASE+FLICK_GAIN*Math.abs(sweep)/dt);
+        }
+      }
+      // A line at rest takes the new bend position at once; a moving one glides there so its bend never jumps
+      const follow=quiet?1:1-Math.exp(-dt*FOLLOW);
+      line.y+=(line.aimY-line.y)*follow;line.reach+=(line.aimReach-line.reach)*follow;
       const share=(line.x-sx)/axisX;
       if(!reduced&&shuttleMoving&&opacity>.05&&Math.abs(share)<1){
         const u=Math.abs(share)*geometry.shuttle.halfLength,profile=geometry.shuttle.profile;
@@ -188,16 +213,19 @@
         for(let j=1;j<profile.length;j++){if(u<=profile[j][0]){const a=profile[j-1],b=profile[j];thick=lerp(a[1],b[1],(u-a[0])/(b[0]-a[0]))/geometry.shuttle.halfThickness;break;}}
         wanted=(line.index%2?1:-1)*halfThickness*.85*thick*opacity;
         line.y=sy+share*Math.sin(angle)*halfLength;line.reach=halfThickness*(thick+.6)+18;
+        // The shuttle takes the line from the pointer
+        line.aimY=line.y;line.aimReach=line.reach;line.held=0;carried=false;
       }
       if(reduced){line.offset=0;line.velocity=0;}else{// Substeps preserve the underdamped rebound even on slower frames.
-        const steps=Math.max(1,Math.ceil(dt/.008)),step=dt/steps;
-        for(let n=0;n<steps;n++){line.velocity+=(320*(wanted-line.offset)-9*line.velocity)*step;line.offset+=line.velocity*step;}}
+        const steps=Math.max(1,Math.ceil(dt/.008)),step=dt/steps,k=carried?CARRY_K:FREE_K,c=carried?CARRY_C:FREE_C;
+        for(let n=0;n<steps;n++){line.velocity+=(k*(wanted-line.offset)-c*line.velocity)*step;line.offset+=line.velocity*step;}}
       if(Math.abs(wanted-line.offset)>.025||Math.abs(line.velocity)>.2)moving=true;
       const lit=Math.min(1,Math.abs(line.offset)/6);
       ctx.strokeStyle=`rgba(232,223,207,${.04+.22*lit})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(line.x,0);
       const top=line.y-line.reach,bot=line.y+line.reach,bend=line.x+line.offset,h=line.reach*.55;
       ctx.lineTo(line.x,top);ctx.bezierCurveTo(line.x,top+h,bend,line.y-h,bend,line.y);ctx.bezierCurveTo(bend,line.y+h,line.x,bot-h,line.x,bot);ctx.lineTo(line.x,height);ctx.stroke();
     }
+    lastPointer=to;
     return moving;
   }
   function tick(now){frame=0;if(document.hidden)return;const dt=Math.min(.033,(now-last)/1000||.016);last=now;
