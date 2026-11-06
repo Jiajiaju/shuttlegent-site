@@ -1,6 +1,6 @@
 # 架构
 
-本文讲 Shuttlegent 的组成、各部分的职责与主要流程，给修改插件的开发者看。构建与调试见 [Development.md](Development.md)。文中路径相对插件根目录。
+本文讲 Shuttlegent 的组成、各部分的职责与主要流程，给修改插件的开发者看。构建与调试见 [开发](Development.md)。文中路径相对插件根目录。
 
 ## 1. 总览
 
@@ -52,7 +52,7 @@ flowchart TB
 |---|---|---|
 | 运行时层 | `ShuttlegentCore` | 设置、生成运行时补丁、解析密钥、启动运行时、ACP 会话、会话记录 |
 | 工具层 | `ShuttlegentMcpServer` | MCP 端点、写入门、工具注册接口 `IShuttlegentToolProvider`、外部 MCP 声明 |
-| 工具层 | `ShuttlegentTools` | 内置编辑器工具，清单见 [Tools.md §2](Tools.md#2-内置工具) |
+| 工具层 | `ShuttlegentTools` | 内置编辑器工具，清单见 [工具 §2](Tools.md#2-内置工具) |
 | 工具层 | `ShuttlegentToolsetBridge` | 接入引擎 Toolset Registry |
 | 界面层 | `ShuttlegentEditor` | 对话面板、对话状态、引用、斜杠模板与内置斜杠命令、设置页定制；在 `PostEngineInit` 阶段加载 |
 
@@ -186,7 +186,7 @@ sequenceDiagram
 - 面板未打开时，写请求直接拒绝；
 - 确认超时 55 秒，短于运行时 60 秒的工具超时。
 
-工具清单与引擎 Toolset 规则见 [Tools.md](Tools.md)。
+工具清单与引擎 Toolset 规则见 [工具](Tools.md)。
 
 ## 4. 对话面板
 
@@ -237,7 +237,7 @@ flowchart TB
 
 ### 4.3 模式、计划与命令
 
-- 模式：手动、自动接受编辑、自动三项是 `EShuttlegentWriteMode`，按对话记在 `FShuttlegentConversation::WriteMode`，并写入会话索引（`writeMode`），重新打开、分支都沿用；只决定编辑器写入是否弹确认卡，从下一次写入起算，规则见 [Tools.md §1](Tools.md#1-改动的确认与撤销)。
+- 模式：手动、自动接受编辑、自动三项是 `EShuttlegentWriteMode`，按对话记在 `FShuttlegentConversation::WriteMode`，并写入会话索引（`writeMode`），重新打开、分支都沿用；只决定编辑器写入是否弹确认卡，从下一次写入起算，规则见 [工具 §1](Tools.md#1-改动的确认与撤销)。
 - 计划模式：经 session control 插件的 `planMode` 进入或退出，会话创建前打开时先记下、会话就绪后先应用再发送第一条提示；恢复会话时查询运行时记录的状态。Harness 的计划模式只改提示词、不限制工具，只读由写入门保证：发起写入的对话处于计划模式时一律拒绝。`exit_plan_mode` 交出的计划经 `shuttlegent/planReview` 到达，审批结果经 `answerPlanReview` 答复；“批准并执行”把对话的写入方式改为自动接受编辑，“批准，逐项确认”改为手动，在 Agent 开始写入之前生效。计划与审批结果（`EShuttlegentChatEntryKind::Plan`）在审批结束时写入会话记录（`plan`）；回合取消或运行时退出时，等待中的审批标为已取消。计划模式提示词由插件补丁改成编辑器场景的说法，提问改用 `ask_user`。
 - 上下文压缩：`compaction/*` 事件在对话中显示为一条分隔行（`EShuttlegentChatEntryKind::Compaction`），结束时用插件报来的压缩后用量更新上下文卡片，并把结果写入会话记录（`compaction`）。手动压缩为 `FShuttlegentChatModel::CompactContext`，经 `RunCommand` 执行 `/compact`，条件与“回到这里”相同。
 - 内置斜杠命令：整段输入以下列命令开头时，由页面在编辑器侧执行，不发给模型（`Resources/Web/app.js` 的 `runSlashCommand`）；ACP 的 `session/prompt` 不解析斜杠命令，需要运行时执行的经 session control 的 `command`。其他以 `/` 开头的文字照常作为消息发送：
@@ -323,7 +323,7 @@ flowchart TB
 | McpServer | `FShuttlegentWriteGate` | 写操作确认门：排队、超时、结果上报、撤销 |
 | McpServer | `FShuttlegentExternalMcp` | 把项目的外部 MCP 服务声明给运行时；同时给出每个服务的状态（`FShuttlegentExternalMcpState`，跳过原因为 `EShuttlegentExternalMcpIssue`），供面板 MCP 卡片显示 |
 | McpServer | `IShuttlegentTool` / `IShuttlegentToolProvider` | 工具接口 / 工具提供者接口（扩展点） |
-| Tools | `FShuttlegentBuiltinToolProvider` | 提供内置工具（清单见 [Tools.md §2](Tools.md#2-内置工具)） |
+| Tools | `FShuttlegentBuiltinToolProvider` | 提供内置工具（清单见 [工具 §2](Tools.md#2-内置工具)） |
 | ToolsetBridge | `FShuttlegentToolsets` | 读取 Toolset Registry：可见性、工具列表、读写判断、执行 |
 | Editor | `FShuttlegentChatModel` / `FShuttlegentConversation` | 对话状态：同时持有多个对话，写入、提问按对话归属 / 单个对话 |
 | Editor | `FShuttlegentChatView` | 一个页签的对话视图：持有它显示的对话，转发模型接口与事件 |

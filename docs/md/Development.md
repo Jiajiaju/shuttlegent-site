@@ -1,6 +1,6 @@
 # 开发
 
-本文讲怎么构建、编译、测试和排查 Shuttlegent，给修改插件的开发者看。架构见 [Architecture.md](Architecture.md)。
+本文讲怎么构建、编译、测试和排查 Shuttlegent，给修改插件的开发者看。架构见 [架构](Architecture.md)。
 
 ## 1. 仓库结构
 
@@ -81,7 +81,7 @@ git submodule update --init
 & .\Build\Probe\RunRegression.ps1
 ```
 
-场景清单与参数见 [Build/Probe/README.md](../Build/Probe/README.md)。
+场景清单与参数见 [回归脚本说明](../Build/Probe/README.md)。
 
 ### 4.1 工具选择评测
 
@@ -91,7 +91,7 @@ git submodule update --init
 & .\Build\Eval\RunEval.ps1
 ```
 
-任务、检查项与工具快照的维护见 [Build/Eval/README.md](../Build/Eval/README.md)。
+任务、检查项与工具快照的维护见 [评测说明](../Build/Eval/README.md)。
 
 ## 5. 控制台命令
 

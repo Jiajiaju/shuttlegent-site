@@ -1,6 +1,6 @@
 # 常见问题
 
-本文按问题整理使用中常遇到的情况，给使用者看。各项设置的说明见 [Configuration.md](Configuration.md)。
+本文按问题整理使用中常遇到的情况，给使用者看。各项设置的说明见 [配置](Configuration.md)。
 
 ## 1. 安装与连接
 
@@ -24,7 +24,7 @@
 
 可以。在 **编辑器偏好设置 > Shuttlegent > General > Models** 添加一条连接，只填 Base Url（如 `https://api.openai.com/v1`）和 Api Key。插件自动识别协议（OpenAI Responses、OpenAI Chat Completions、Anthropic Messages，含兼容这些协议的团队网关、本地模型服务），并列出这个密钥能用的全部模型，都会出现在面板的模型菜单里。
 
-新会话默认用第一条已连通的连接中的第一个模型；内置 DeepSeek 连接没填密钥时会被跳过。详见 [Configuration.md §1](Configuration.md#1-模型agent-与默认值个人)。
+新会话默认用第一条已连通的连接中的第一个模型；内置 DeepSeek 连接没填密钥时会被跳过。详见 [配置 §1](Configuration.md#1-模型agent-与默认值个人)。
 
 ### 1.5 密钥存在哪里，会不会进版本库
 
@@ -46,7 +46,7 @@
 - 目录可能没下载成功：在 Output Log 里搜 `Reasoning efforts`，联网后点 Status 旁的刷新按钮重测。
 - 目录里没有这个模型（常见于团队网关、本地模型服务的自定义模型名）：暂时无法选择档位。
 
-详见 [Configuration.md §1.2](Configuration.md#12-推理强度档位)。
+详见 [配置 §1.2](Configuration.md#12-推理强度档位)。
 
 ## 2. 改动与撤销
 
@@ -67,7 +67,7 @@
 
 ![改动后：三盏路灯强度都是 8000](../assets/shots/viewport-after.jpg)
 
-详见 [Tools.md §1](Tools.md#1-改动的确认与撤销)。
+详见 [工具 §1](Tools.md#1-改动的确认与撤销)。
 
 ### 2.3 想把一整轮对话里的改动一起撤回
 

@@ -14,7 +14,7 @@ Shuttlegent 本身不绑定任何项目。项目可以把自己的规则、做�
 | 接入项目知识库、术语表等服务 | 外部 MCP 服务（§5） | 项目设置 Integration > External Mcp Servers | 否（服务本身需另行提供） |
 | 给 Agent 加项目专用的编辑器操作 | 自定义工具（§6） | C++ 模块 | 是 |
 
-项目设置都保存在项目的 `Config/DefaultShuttlegent.ini`，随项目进版本库，全团队生效。`Samples/ShuttlegentSample` 是覆盖上面全部扩展点的示例，启用方法见 [Samples/ShuttlegentSample/README.md](../Samples/ShuttlegentSample/README.md)。
+项目设置都保存在项目的 `Config/DefaultShuttlegent.ini`，随项目进版本库，全团队生效。`Samples/ShuttlegentSample` 是覆盖上面全部扩展点的示例，启用方法见 [示例说明](../Samples/ShuttlegentSample/README.md)。
 
 ## 1. 提示词与记忆
 
@@ -127,7 +127,7 @@ Template Dirs 里的所有 `.md` 文件（包括子目录）都会读取；同�
 
 ## 6. 自定义工具
 
-需要 C++。项目或插件可以提供自己的编辑器工具，和内置工具走同一套确认与撤销，见 [Tools.md §1](Tools.md#1-改动的确认与撤销)。
+需要 C++。项目或插件可以提供自己的编辑器工具，和内置工具走同一套确认与撤销，见 [工具 §1](Tools.md#1-改动的确认与撤销)。
 
 1. 模块依赖 `ShuttlegentMcpServer`。
 2. 实现 `IShuttlegentTool`：

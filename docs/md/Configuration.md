@@ -1,6 +1,6 @@
 # 配置
 
-本文讲 Shuttlegent 的各项设置，给使用者和项目负责人看。项目规则、技能等扩展的写法见 [Extending.md](Extending.md)。
+本文讲 Shuttlegent 的各项设置，给使用者和项目负责人看。项目规则、技能等扩展的写法见 [项目扩展](Extending.md)。
 
 设置分两处：
 
@@ -15,8 +15,8 @@
 
 | 文件或目录 | 内容 |
 |---|---|
-| `SHUTTLEGENT.local.md` | 个人提示词，见 [Extending.md §1](Extending.md#1-提示词与记忆) |
-| `MEMORY.md` | 个人记忆，见 [Extending.md §1](Extending.md#1-提示词与记忆) |
+| `SHUTTLEGENT.local.md` | 个人提示词，见 [项目扩展 §1](Extending.md#1-提示词与记忆) |
+| `MEMORY.md` | 个人记忆，见 [项目扩展 §1](Extending.md#1-提示词与记忆) |
 | `Sessions/` | 会话记录、会话列表、草稿与排队消息、发过的图片 |
 | `Captures/`、`Exports/` | Agent 的截图、数据表导出 |
 | `ModelCatalog/` | 查推理强度档位用的模型目录缓存，见 §1.2 |
@@ -70,7 +70,7 @@
 
 ## 2. 权限（个人）
 
-这些开关管的是**运行时自己的能力**（读写文件、执行命令行）。编辑器里的改动（改属性、生成 Actor 等）不受它们影响，始终按会话的模式确认，见 [Tools.md §1](Tools.md#1-改动的确认与撤销)。
+这些开关管的是**运行时自己的能力**（读写文件、执行命令行）。编辑器里的改动（改属性、生成 Actor 等）不受它们影响，始终按会话的模式确认，见 [工具 §1](Tools.md#1-改动的确认与撤销)。
 
 | 字段 | 默认值 | 说明 |
 |---|---|---|
@@ -85,7 +85,7 @@
 - **Editor Tools**：每个编辑器工具一个开关，关掉后 Agent 看不到也用不了，立即生效。
 - **Engine Toolsets**：每个已启用的引擎 Toolset 一个开关；项目统一屏蔽的显示为锁定。
 
-工具清单见 [Tools.md](Tools.md)。
+工具清单见 [工具](Tools.md)。
 
 ## 4. 运行时与外观（个人）
 
@@ -108,14 +108,14 @@
 
 | 字段 | 作用 | 详见 |
 |---|---|---|
-| Integration > Skill Dirs | Agent 可以按需加载的技能目录 | [Extending.md §2](Extending.md#2-技能) |
-| Integration > Template Dirs | 斜杠模板目录 | [Extending.md §3](Extending.md#3-斜杠模板) |
-| Integration > Ui Guides | Agent 可以帮用户打开的编辑器位置 | [Extending.md §4](Extending.md#4-界面指路) |
-| Integration > External Mcp Servers | 接入的外部知识或工具服务 | [Extending.md §5](Extending.md#5-外部-mcp-服务) |
-| Engine Toolsets > Blocked Toolset Names | 全团队屏蔽的引擎 Toolset 或工具 | [Tools.md §3](Tools.md#3-引擎-toolset) |
-| Engine Toolsets > Read Only Tool Prefixes / Read Only Tools / Write Tools | 引擎工具哪些算只读、哪些算改动 | [Tools.md §3](Tools.md#3-引擎-toolset) |
-| Engine Toolsets > Non Undoable Tools | 标为不可撤销的引擎工具 | [Tools.md §3.3](Tools.md#33-撤销) |
-| Engine Toolsets > Destructive Tool Prefixes | 名字以这些词开头的引擎工具，确认卡标为删除、移动或改名 | [Tools.md §3](Tools.md#3-引擎-toolset) |
+| Integration > Skill Dirs | Agent 可以按需加载的技能目录 | [项目扩展 §2](Extending.md#2-技能) |
+| Integration > Template Dirs | 斜杠模板目录 | [项目扩展 §3](Extending.md#3-斜杠模板) |
+| Integration > Ui Guides | Agent 可以帮用户打开的编辑器位置 | [项目扩展 §4](Extending.md#4-界面指路) |
+| Integration > External Mcp Servers | 接入的外部知识或工具服务 | [项目扩展 §5](Extending.md#5-外部-mcp-服务) |
+| Engine Toolsets > Blocked Toolset Names | 全团队屏蔽的引擎 Toolset 或工具 | [工具 §3](Tools.md#3-引擎-toolset) |
+| Engine Toolsets > Read Only Tool Prefixes / Read Only Tools / Write Tools | 引擎工具哪些算只读、哪些算改动 | [工具 §3](Tools.md#3-引擎-toolset) |
+| Engine Toolsets > Non Undoable Tools | 标为不可撤销的引擎工具 | [工具 §3.3](Tools.md#33-撤销) |
+| Engine Toolsets > Destructive Tool Prefixes | 名字以这些词开头的引擎工具，确认卡标为删除、移动或改名 | [工具 §3](Tools.md#3-引擎-toolset) |
 
 外部服务是否已接入、被跳过的原因，可以在面板检视窗格的 MCP 卡片里查看。
 
